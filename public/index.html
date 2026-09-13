@@ -272,16 +272,6 @@ p{margin:0 0 14px}
     </div>
 
     <div class="block">
-      <h3>¿Quiénes juegan?</h3>
-      <p class="hint">El apodo de cada uno, como se llaman entre ustedes.</p>
-      <div class="addrow">
-        <input id="pName" placeholder="Apodo" maxlength="14" autocomplete="off" aria-label="Apodo del jugador">
-        <button class="add" id="pAdd">Agregar</button>
-      </div>
-      <div class="chips" id="players"></div>
-    </div>
-
-    <div class="block">
       <div class="switchrow"><div>Permitir un pase por turno<small>Cuesta 1 punto para el otro equipo</small></div><button class="sw" id="swPass" aria-pressed="true" aria-label="Permitir un pase por turno"></button></div>
       <div class="switchrow"><div>Sonido<small>Aviso en los últimos 10 segundos</small></div><button class="sw" id="swSound" aria-pressed="true" aria-label="Sonido"></button></div>
       <div class="switchrow" style="border-bottom:1px solid var(--ink3)"><div>Vibración<small>Cada acierto</small></div><button class="sw" id="swVib" aria-pressed="true" aria-label="Vibración"></button></div>
@@ -295,8 +285,18 @@ p{margin:0 0 14px}
 
 <!-- ============ EQUIPOS ============ -->
 <section class="screen" id="s-teams">
-  <div class="top"><button class="back" data-go="setup">‹ Ajustes</button><h3 style="font-size:17px">Equipos</h3></div>
+  <div class="top"><button class="back" data-go="setup">‹ Ajustes</button><h3 style="font-size:17px">Jugadores y equipos</h3></div>
   <div class="scroll">
+    <div class="block">
+      <h3>¿Quiénes juegan?</h3>
+      <p class="hint">El apodo de cada uno, como se llaman entre ustedes. Se reparten en los equipos a medida que los agregas.</p>
+      <div class="addrow">
+        <input id="pName" placeholder="Apodo" maxlength="14" autocomplete="off" aria-label="Apodo del jugador">
+        <button class="add" id="pAdd">Agregar</button>
+      </div>
+      <div class="chips" id="players"></div>
+    </div>
+
     <div class="block">
       <h3>¿Cuántos equipos?</h3>
       <p class="hint">Mínimo 2 jugadores en cada uno.</p>
@@ -541,7 +541,7 @@ function renderPlayers(){
     : `<div class="empty" style="width:100%">Todavía no hay nadie. Agrega mínimo 4 apodos.</div>`;
   $$("#players .chip button").forEach(b=>b.onclick=()=>{
     S.players.splice(+b.dataset.i,1);
-    renderPlayers(); checkSetup();
+    renderPlayers(); syncTeams(); checkTeams();
   });
 }
 function addPlayer(){
@@ -552,7 +552,7 @@ function addPlayer(){
   S.players.push(n);
   inp.value=""; inp.focus();
   beep(760,.05);
-  renderPlayers(); checkSetup();
+  renderPlayers(); syncTeams(); checkTeams();
 }
 function dealTeams(keepNames){
   const names = shuffle([...TEAMNAMES]);
@@ -565,9 +565,18 @@ function dealTeams(keepNames){
   order.forEach((p,i)=>S.teams[i % S.nTeams].members.push(p));
   renderTeams();
 }
-function membersOk(){
-  const all = S.teams.flatMap(t=>t.members);
-  return S.teams.length===S.nTeams && all.length===S.players.length && S.players.every(p=>all.includes(p));
+function syncTeams(){
+  // Reacomoda los equipos según la lista actual de jugadores.
+  if(S.mode==="azar"){ dealTeams(true); return; }
+  // A dedo: conserva lo armado, suelta a los que salieron y mete a los nuevos en el equipo más chico.
+  if(S.teams.length!==S.nTeams){ dealTeams(false); return; }
+  const assigned = S.teams.flatMap(t=>t.members);
+  S.teams.forEach(t=>{ t.members = t.members.filter(m=>S.players.includes(m)); });
+  S.players.filter(p=>!assigned.includes(p)).forEach(p=>{
+    const smallest = S.teams.reduce((a,b)=> b.members.length < a.members.length ? b : a);
+    smallest.members.push(p);
+  });
+  renderTeams();
 }
 function moveMember(ti, mi){
   const [p] = S.teams[ti].members.splice(mi,1);
@@ -602,15 +611,23 @@ function renderTeams(){
   $$("#teams .member.tap").forEach(b=> b.onclick = ()=> moveMember(+b.dataset.t, +b.dataset.m));
 }
 function checkTeams(){
-  const flojo = S.teams.find(t=>t.members.length<2);
-  const msg = flojo ? `${flojo.name} necesita al menos 2 jugadores.` : "";
+  const faltan = 4 - S.players.length;
+  let msg = "";
+  if(faltan > 0){
+    msg = `Faltan ${faltan} ${faltan===1?"jugador":"jugadores"}. Con menos de 4 no tiene gracia.`;
+  } else {
+    const flojo = S.teams.find(t=>t.members.length<2);
+    if(flojo) msg = `${flojo.name} necesita al menos 2 jugadores.`;
+  }
   $("#warnTeams").textContent = msg;
   $("#startGame").disabled = !!msg;
   $("#startGame").style.opacity = msg ? .45 : 1;
 }
 function goTeams(){
-  if(!membersOk()) dealTeams(false);
-  renderTeams(); checkTeams(); screen("teams");
+  renderPlayers();
+  syncTeams();
+  checkTeams();
+  screen("teams");
 }
 function seg(sel, key, after){
   $$(sel+" button").forEach(b=>b.onclick=()=>{
@@ -627,11 +644,10 @@ function sw(sel,key){
 }
 function pool(){ return [...S.cats].reduce((n,id)=>n+catById(id).w.length,0); }
 function checkSetup(){
-  const n = pool(), faltan = 4 - S.players.length;
+  const n = pool();
   let msg = "";
   if(S.cats.size===0) msg = "Elige al menos una categoría.";
   else if(n < S.total) msg = `Con esas categorías solo hay ${n} palabras. Agrega otra o baja el número.`;
-  else if(faltan > 0) msg = `Faltan ${faltan} ${faltan===1?"jugador":"jugadores"}. Con menos de 4 no tiene gracia.`;
   const ok = !msg;
   $("#warn").textContent = msg;
   $("#toTeams").disabled = !ok;
