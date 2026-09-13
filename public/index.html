@@ -5,7 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <meta name="theme-color" content="#1D1640">
 <title>La Pecera — juego de palabras en 3 rondas</title>
-<meta name="description" content="La Pecera: juego de fiesta de palabras en 3 rondas — descríbela, una sola palabra y mímica. Para 4 o más, en tu teléfono, sin instalar nada y sin internet.">
+<meta name="description" content="La Pecera: juego de fiesta de palabras en 3 rondas — descríbela, una sola palabra y mímica. Para 4 o más, en tu teléfono, gratis, sin instalar nada y sin internet.">
+<meta name="keywords" content="juego de palabras, juego de fiesta, La Pecera, fishbowl, juego del sombrero, charadas, mímica, juego para grupos, juego sin internet, juego gratis, PWA">
+<meta name="author" content="complexluise">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<link rel="canonical" href="https://lapecera-juego.web.app/">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
@@ -14,8 +18,20 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="La Pecera">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="La Pecera">
+<meta property="og:locale" content="es_CO">
+<meta property="og:url" content="https://lapecera-juego.web.app/">
 <meta property="og:title" content="La Pecera — juego de palabras en 3 rondas">
-<meta property="og:description" content="Juego de fiesta de palabras en 3 rondas. Para 4 o más, en tu teléfono, sin internet.">
+<meta property="og:description" content="Juego de fiesta de palabras en 3 rondas: descríbela, una sola palabra y mímica. Para 4 o más, en el teléfono, gratis y sin internet.">
+<meta property="og:image" content="https://lapecera-juego.web.app/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="La Pecera — juego de palabras en 3 rondas">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="La Pecera — juego de palabras en 3 rondas">
+<meta name="twitter:description" content="Juego de fiesta de palabras en 3 rondas. Para 4 o más, gratis y sin internet.">
+<meta name="twitter:image" content="https://lapecera-juego.web.app/og-image.png">
+<meta name="twitter:image:alt" content="La Pecera — juego de palabras en 3 rondas">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -217,6 +233,62 @@ p{margin:0 0 14px}
 .trophy{font-size:44px;line-height:1}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": ["VideoGame", "WebApplication"],
+  "name": "La Pecera",
+  "alternateName": "La Pecera — juego de palabras",
+  "url": "https://lapecera-juego.web.app/",
+  "image": "https://lapecera-juego.web.app/og-image.png",
+  "screenshot": "https://lapecera-juego.web.app/og-image.png",
+  "description": "La Pecera es un juego de fiesta de palabras en 3 rondas para 4 o más personas, en equipos. Las tres rondas usan las mismas palabras: primero se describe hablando, luego con una sola palabra de pista y por último con mímica. Se juega en el teléfono, es gratis, no requiere instalación y funciona sin internet.",
+  "inLanguage": "es",
+  "applicationCategory": "GameApplication",
+  "genre": ["Juego de fiesta", "Juego de palabras"],
+  "gamePlatform": "Navegador web",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requiere un navegador con JavaScript",
+  "playMode": "MultiPlayer",
+  "numberOfPlayers": { "@type": "QuantitativeValue", "minValue": 4 },
+  "isAccessibleForFree": true,
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "availability": "https://schema.org/InStock" },
+  "author": { "@type": "Person", "name": "complexluise", "url": "https://github.com/complexluise" },
+  "sameAs": ["https://github.com/complexluise/la-pecera"]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "Cómo se juega a La Pecera",
+  "description": "La Pecera se juega en equipos, en 3 rondas que usan las mismas palabras y cada vez dan menos ayuda. Gana el equipo con más puntos sumando las tres rondas.",
+  "inLanguage": "es",
+  "totalTime": "PT25M",
+  "step": [
+    { "@type": "HowToStep", "position": 1, "name": "Ronda 1 — Descríbela", "text": "Explicás la palabra hablando todo lo que quieras, sin decir la palabra ni partes de ella, hasta que tu equipo la adivine." },
+    { "@type": "HowToStep", "position": 2, "name": "Ronda 2 — Una sola palabra", "text": "Con las mismas palabras, solo podés dar UNA palabra como pista. Aquí se paga la atención de la primera ronda." },
+    { "@type": "HowToStep", "position": 3, "name": "Ronda 3 — Mímica", "text": "Las mismas palabras otra vez, pero sin hablar ni hacer sonidos: solo mímica con el cuerpo." }
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "es",
+  "mainEntity": [
+    { "@type": "Question", "name": "¿Qué es La Pecera?", "acceptedAnswer": { "@type": "Answer", "text": "La Pecera es un juego de fiesta de palabras en 3 rondas para 4 o más personas. Se juega gratis en el teléfono, sin instalar nada y sin internet." } },
+    { "@type": "Question", "name": "¿Cuántas personas se necesitan para jugar?", "acceptedAnswer": { "@type": "Answer", "text": "Al menos 4 personas, repartidas en 2 o más equipos con un mínimo de 2 jugadores por equipo." } },
+    { "@type": "Question", "name": "¿Cuáles son las 3 rondas?", "acceptedAnswer": { "@type": "Answer", "text": "Las tres rondas usan las mismas palabras: 1) describirla hablando, 2) una sola palabra de pista y 3) mímica sin hablar. Por eso conviene poner atención desde la primera ronda." } },
+    { "@type": "Question", "name": "¿Es gratis y necesito instalar algo?", "acceptedAnswer": { "@type": "Answer", "text": "Es gratis y no requiere instalación. Se abre en el navegador y, si querés, se puede agregar a la pantalla de inicio como app; después funciona sin internet." } },
+    { "@type": "Question", "name": "¿En qué se parece al juego del sombrero o fishbowl?", "acceptedAnswer": { "@type": "Answer", "text": "La Pecera es una versión digital de la mecánica del fishbowl o juego del sombrero: las mismas palabras se adivinan en rondas sucesivas, cada vez con menos ayuda, aquí en el teléfono y con marcador automático." } }
+  ]
+}
+</script>
 </head>
 <body>
 <div id="app">
@@ -225,7 +297,7 @@ p{margin:0 0 14px}
 <section class="screen on" id="s-home">
   <div class="hero">
     <div class="bowl">
-      <div class="wordmark"><span>el juego de</span>LA<br>PECERA</div>
+      <h1 class="wordmark"><span>el juego de</span>LA<br>PECERA</h1>
       <div class="steps">
         <div class="step s1"><b>1</b><div><div class="t">Descríbela</div><small>Habla lo que quieras, menos la palabra</small></div></div>
         <div class="step s2"><b>2</b><div><div class="t">Una sola palabra</div><small>Una pista. Nada más. Y a rezar</small></div></div>
