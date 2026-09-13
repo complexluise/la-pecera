@@ -1,0 +1,54 @@
+name: Deploy a Firebase Hosting
+
+# Publica en Firebase Hosting: canal "live" al empujar a main,
+# canal de preview con URL temporal en cada Pull Request.
+# El proyecto de destino se toma de .firebaserc (fuente única de verdad).
+#
+# Requiere el secret FIREBASE_SERVICE_ACCOUNT (JSON de una service account
+# con rol "Firebase Hosting Admin"). Mientras no exista, el job se salta solo.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  checks: write
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: firebase-hosting-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ¿Hay credenciales de Firebase?
+        id: guard
+        run: |
+          if [ -n "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Falta el secret FIREBASE_SERVICE_ACCOUNT; se omite el deploy."
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.guard.outputs.ready == 'true'
+
+      - name: Deploy a producción (live)
+        if: steps.guard.outputs.ready == 'true' && github.event_name == 'push'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          channelId: live
+
+      - name: Deploy de preview (PR)
+        if: steps.guard.outputs.ready == 'true' && github.event_name == 'pull_request'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}

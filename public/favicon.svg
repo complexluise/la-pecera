@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="La Pecera">
+  <defs>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4ADFC6"/>
+      <stop offset="1" stop-color="#2CA7B5"/>
+    </linearGradient>
+    <clipPath id="bowl">
+      <circle cx="256" cy="300" r="140"/>
+    </clipPath>
+  </defs>
+
+  <!-- fondo -->
+  <rect width="512" height="512" rx="112" fill="#1D1640"/>
+
+  <!-- agua dentro de la pecera -->
+  <g clip-path="url(#bowl)">
+    <rect x="116" y="252" width="280" height="200" fill="url(#water)"/>
+    <path d="M116 252 q35 -22 70 0 t70 0 t70 0 t70 0 v200 h-280 Z" fill="url(#water)"/>
+  </g>
+
+  <!-- pez -->
+  <g>
+    <ellipse cx="266" cy="322" rx="46" ry="30" fill="#FF5C8A"/>
+    <path d="M226 322 l-42 -26 v52 Z" fill="#FF5C8A"/>
+    <circle cx="288" cy="314" r="7" fill="#FFF3E2"/>
+  </g>
+
+  <!-- burbujas: guiño a las 3 rondas -->
+  <circle cx="316" cy="250" r="9" fill="#4ADFC6"/>
+  <circle cx="332" cy="222" r="6.5" fill="#FFC247"/>
+  <circle cx="344" cy="199" r="4.5" fill="#FF5C8A"/>
+
+  <!-- vidrio de la pecera -->
+  <circle cx="256" cy="300" r="140" fill="none" stroke="#FFF3E2" stroke-width="15"/>
+  <!-- boca de la pecera -->
+  <ellipse cx="256" cy="171" rx="98" ry="26" fill="#1D1640" stroke="#FFF3E2" stroke-width="15"/>
+</svg>

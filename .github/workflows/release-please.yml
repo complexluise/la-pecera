@@ -1,0 +1,21 @@
+name: release-please
+
+# Corta versiones automáticamente desde los conventional commits de main:
+# abre/mantiene un PR de release y, al mergearlo, crea el tag, el CHANGELOG y el GitHub Release.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json

@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="theme-color" content="#1D1640">
+<title>La Pecera — juego de palabras en 3 rondas</title>
+<meta name="description" content="La Pecera: juego de fiesta de palabras en 3 rondas — descríbela, una sola palabra y mímica. Para 4 o más, en tu teléfono, sin instalar nada y sin internet.">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="La Pecera">
+<meta property="og:type" content="website">
+<meta property="og:title" content="La Pecera — juego de palabras en 3 rondas">
+<meta property="og:description" content="Juego de fiesta de palabras en 3 rondas. Para 4 o más, en tu teléfono, sin internet.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1D1640;
+  --ink2:#2A2059;
+  --ink3:#382C72;
+  --cream:#FFF3E2;
+  --muted:#A79AD8;
+  --r1:#4ADFC6;
+  --r2:#FFC247;
+  --r3:#FF5C8A;
+  --hot:#FF6B3D;
+  --accent:var(--r1);
+  --accent-ink:#1D1640;
+  --disp:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --ui:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --pad:clamp(16px,5vw,24px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+body{
+  background:var(--ink);
+  color:var(--cream);
+  font-family:var(--ui);
+  font-size:16px;
+  line-height:1.5;
+  overscroll-behavior:none;
+}
+#app{
+  height:100dvh;
+  display:flex;
+  flex-direction:column;
+  max-width:520px;
+  margin:0 auto;
+  padding:max(env(safe-area-inset-top),12px) var(--pad) max(env(safe-area-inset-bottom),16px);
+}
+.screen{display:none;flex:1;min-height:0;flex-direction:column}
+.screen.on{display:flex}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:6px}
+
+/* ---------- tipografía ---------- */
+h1,h2,h3{font-family:var(--disp);font-weight:800;margin:0;line-height:.95;letter-spacing:-.02em}
+.kicker{font-size:13px;color:var(--muted);letter-spacing:.01em;margin:0 0 6px}
+p{margin:0 0 14px}
+
+/* ---------- botones ---------- */
+.btn{
+  display:block;width:100%;padding:18px 20px;border-radius:18px;
+  background:var(--accent);color:var(--accent-ink);
+  font-family:var(--disp);font-weight:800;font-size:20px;letter-spacing:-.01em;
+  text-align:center;transition:transform .12s ease;
+}
+.btn:active{transform:scale(.975)}
+.btn.ghost{background:none;color:var(--cream);box-shadow:inset 0 0 0 2px var(--ink3);font-size:17px;padding:14px 18px}
+.btn.ghost:active{background:var(--ink2)}
+.btn.small{font-size:15px;padding:11px 14px;border-radius:13px}
+
+/* ---------- portada ---------- */
+.hero{flex:1;display:flex;flex-direction:column;justify-content:center;gap:28px;padding:8px 0 20px}
+.wordmark{font-family:var(--disp);font-weight:800;font-size:clamp(56px,19vw,96px);line-height:.82;letter-spacing:-.045em}
+.wordmark span{display:block}
+.wordmark span:nth-child(1){color:var(--muted);font-size:.42em;letter-spacing:-.01em;margin-bottom:.14em}
+.bowl{
+  border-radius:0 0 140px 140px / 0 0 60px 60px;
+  box-shadow:inset 0 0 0 2px var(--ink3);
+  padding:26px 20px 34px;
+  background:linear-gradient(180deg,rgba(74,223,198,.07),rgba(255,92,138,.07));
+}
+.steps{display:flex;flex-direction:column;gap:2px;margin-top:22px}
+.step{display:flex;align-items:center;gap:14px;padding:12px 0;border-top:1px solid var(--ink3)}
+.step b{font-family:var(--disp);font-size:26px;width:26px;flex:none;text-align:center}
+.step small{display:block;color:var(--muted);font-size:13px}
+.step .t{font-weight:600}
+.s1 b{color:var(--r1)} .s2 b{color:var(--r2)} .s3 b{color:var(--r3)}
+
+/* ---------- setup ---------- */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 0 18px}
+.back{color:var(--muted);font-size:14px;padding:6px 2px}
+.block{margin-bottom:26px}
+.block > h3{font-size:19px;margin-bottom:4px}
+.hint{color:var(--muted);font-size:13px;margin:0 0 12px}
+.cats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cat{
+  text-align:left;padding:12px 12px 11px;border-radius:15px;
+  box-shadow:inset 0 0 0 1.5px var(--ink3);background:var(--ink2);
+  display:flex;flex-direction:column;gap:2px;min-height:74px;justify-content:center;
+  transition:background .15s ease;
+}
+.cat .e{font-size:19px;line-height:1}
+.cat .n{font-weight:600;font-size:14px;line-height:1.25}
+.cat .c{color:var(--muted);font-size:11.5px}
+.cat[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);box-shadow:inset 0 0 0 1.5px var(--accent)}
+.cat[aria-pressed="true"] .c{color:rgba(29,22,64,.62)}
+.cat.spicy{box-shadow:inset 0 0 0 1.5px var(--hot)}
+.cat.spicy[aria-pressed="true"]{background:var(--hot);box-shadow:inset 0 0 0 1.5px var(--hot)}
+.seg{display:flex;gap:7px;flex-wrap:wrap}
+.seg button{
+  flex:1;min-width:62px;padding:12px 6px;border-radius:13px;background:var(--ink2);
+  box-shadow:inset 0 0 0 1.5px var(--ink3);font-weight:600;font-size:15px;text-align:center;
+}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);box-shadow:none}
+.seg small{display:block;font-weight:400;font-size:11px;opacity:.7}
+.teams{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.teamrow{display:flex;align-items:center;gap:10px}
+.dot{width:11px;height:11px;border-radius:50%;flex:none}
+.teamrow input{
+  flex:1;padding:12px 14px;border-radius:13px;border:0;background:var(--ink2);
+  box-shadow:inset 0 0 0 1.5px var(--ink3);color:var(--cream);font:inherit;font-weight:600;min-width:0;
+}
+.teamrow input::placeholder{color:var(--muted)}
+.switchrow{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 0;border-top:1px solid var(--ink3)}
+.switchrow div{font-size:14.5px}
+.switchrow small{display:block;color:var(--muted);font-size:12.5px}
+.sw{width:52px;height:31px;border-radius:20px;background:var(--ink3);position:relative;flex:none;transition:background .18s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:25px;height:25px;border-radius:50%;background:var(--cream);transition:transform .18s}
+.sw[aria-pressed="true"]{background:var(--accent)}
+.sw[aria-pressed="true"]::after{transform:translateX(21px)}
+.sticky{position:sticky;bottom:0;padding:14px 0 4px;background:linear-gradient(180deg,transparent,var(--ink) 30%)}
+.warn{color:var(--hot);font-size:13px;margin:0 0 10px;min-height:0}
+
+.addrow{display:flex;gap:8px;margin-bottom:12px}
+.addrow input{flex:1;min-width:0;padding:13px 14px;border-radius:13px;border:0;background:var(--ink2);box-shadow:inset 0 0 0 1.5px var(--ink3);color:var(--cream);font:inherit;font-weight:500}
+.addrow input::placeholder{color:var(--muted);font-weight:400}
+.addrow .add{flex:none;padding:13px 17px;border-radius:13px;background:var(--accent);color:var(--accent-ink);font-weight:600;font-size:15px}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{display:inline-flex;align-items:center;gap:7px;padding:8px 9px 8px 13px;border-radius:12px;background:var(--ink2);font-size:14px;font-weight:500}
+.chip button{color:var(--muted);font-size:16px;line-height:1;padding:0 3px}
+.chip button:active{color:var(--hot)}
+.empty{color:var(--muted);font-size:13.5px;padding:14px;border-radius:13px;box-shadow:inset 0 0 0 1.5px var(--ink3);text-align:center}
+.shufflebtn{width:100%;margin-top:11px;padding:13px;border-radius:14px;box-shadow:inset 0 0 0 1.5px var(--ink3);font-weight:600;font-size:15px;text-align:center}
+.shufflebtn:active{background:var(--ink2)}
+.teamcard{border-radius:16px;box-shadow:inset 0 0 0 1.5px var(--ink3);padding:12px;display:flex;flex-direction:column;gap:10px}
+.teamhead{display:flex;align-items:center;gap:10px}
+.teamhead input{flex:1;min-width:0;padding:9px 12px;border-radius:11px;border:0;background:var(--ink2);color:var(--cream);font:inherit;font-weight:600;font-size:15px}
+.members{display:flex;flex-wrap:wrap;gap:6px}
+.member{padding:6px 11px;border-radius:10px;background:var(--ink2);font-size:13px;color:var(--cream)}
+.member.tap{background:none;box-shadow:inset 0 0 0 1.5px var(--ink3);padding:7px 11px;display:inline-flex;gap:7px;align-items:center}
+.member.tap span{color:var(--muted);font-size:12px}
+.member.tap:active{background:var(--ink2)}
+.srow .nm small{display:block;font-weight:400;font-size:11.5px;opacity:.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.giverline{display:flex;align-items:center;gap:9px;font-size:15px}
+
+/* ---------- panel de reglas ---------- */
+.sheet{position:fixed;inset:0;z-index:60;background:rgba(12,8,30,.78);display:flex;align-items:flex-end;justify-content:center}
+.sheet[hidden]{display:none}
+.sheetcard{width:100%;max-width:520px;max-height:88dvh;display:flex;flex-direction:column;background:var(--ink2);border-radius:26px 26px 0 0;box-shadow:0 -1px 0 var(--ink3);padding:0 var(--pad) max(env(safe-area-inset-bottom),16px)}
+.sheettop{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 0 12px;position:sticky;top:0;background:var(--ink2)}
+.sheettop button{color:var(--muted);font-size:14px;padding:6px 2px}
+.sheetbody{overflow-y:auto;min-height:0;padding-bottom:14px}
+.rule{padding:14px 0;border-top:1px solid var(--ink3)}
+.rule h4{font-family:var(--disp);font-weight:800;font-size:17px;margin:0 0 5px;letter-spacing:-.01em}
+.rule p{font-size:14.5px;margin:0 0 6px}
+.rule p:last-child{margin:0}
+.rule .no{color:var(--muted);font-size:13.5px}
+.rule b.n{color:var(--accent)}
+.rulesbtn{color:var(--muted);font-size:13.5px;padding:8px 2px;text-decoration:underline;text-underline-offset:3px}
+.tag.gift{background:none;box-shadow:inset 0 0 0 1.5px var(--hot);color:var(--hot)}
+
+/* ---------- intro de ronda / turno ---------- */
+.center{flex:1;display:flex;flex-direction:column;justify-content:center;gap:18px;text-align:left}
+.bigno{font-family:var(--disp);font-weight:800;font-size:clamp(90px,34vw,150px);line-height:.78;color:var(--accent);letter-spacing:-.05em}
+.rulecard{box-shadow:inset 0 0 0 1.5px var(--ink3);border-radius:20px;padding:18px 18px 16px}
+.rulecard p:last-child{margin:0}
+.rulecard .no{color:var(--muted);font-size:13.5px}
+.turnteam{font-family:var(--disp);font-weight:800;font-size:clamp(34px,11vw,52px);line-height:1;letter-spacing:-.03em}
+
+/* ---------- juego ---------- */
+.bar{height:7px;border-radius:10px;background:var(--ink2);overflow:hidden;flex:none}
+.bar i{display:block;height:100%;width:100%;background:var(--accent);transform-origin:left}
+.playtop{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:4px 0 12px;font-size:13px;color:var(--muted)}
+.clock{font-family:var(--disp);font-weight:800;font-size:26px;color:var(--cream);font-variant-numeric:tabular-nums}
+.clock.low{color:var(--hot)}
+.card{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:14px;text-align:center;padding:20px 6px;user-select:none;
+}
+.cardcat{color:var(--muted);font-size:13px}
+.word{font-family:var(--disp);font-weight:800;font-size:clamp(36px,11.5vw,60px);line-height:1.02;letter-spacing:-.03em;overflow-wrap:anywhere}
+.swipehint{color:var(--muted);font-size:12px;opacity:.65}
+.actions{display:flex;flex-direction:column;gap:9px;padding-top:6px;flex:none}
+.card.pop{animation:pop .22s ease}
+@keyframes pop{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ---------- resultados ---------- */
+.scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+.list{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 20px}
+.tag{padding:6px 11px;border-radius:11px;background:var(--ink2);font-size:13.5px}
+.tag.ok{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.tag.miss{box-shadow:inset 0 0 0 1.5px var(--ink3);background:none;color:var(--muted)}
+.score{display:flex;flex-direction:column;gap:7px;margin:6px 0 18px}
+.srow{display:flex;align-items:center;gap:11px;padding:12px 14px;border-radius:14px;background:var(--ink2)}
+.srow .nm{flex:1;font-weight:600;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.srow .pt{font-family:var(--disp);font-weight:800;font-size:22px}
+.srow.lead{background:var(--accent);color:var(--accent-ink)}
+.srow .rr{font-size:11.5px;opacity:.65;font-variant-numeric:tabular-nums}
+.trophy{font-size:44px;line-height:1}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ============ PORTADA ============ -->
+<section class="screen on" id="s-home">
+  <div class="hero">
+    <div class="bowl">
+      <div class="wordmark"><span>el juego de</span>LA<br>PECERA</div>
+      <div class="steps">
+        <div class="step s1"><b>1</b><div><div class="t">Descríbela</div><small>Habla lo que quieras, menos la palabra</small></div></div>
+        <div class="step s2"><b>2</b><div><div class="t">Una sola palabra</div><small>Una pista. Nada más. Y a rezar</small></div></div>
+        <div class="step s3"><b>3</b><div><div class="t">Mímica</div><small>Ni un sonido. Solo cuerpo</small></div></div>
+      </div>
+    </div>
+    <div>
+      <p class="hint" style="margin-bottom:14px">Las tres rondas usan <b style="color:var(--cream)">las mismas palabras</b>. Por eso conviene poner atención desde la primera: lo que recuerden es lo que los salva en la tercera.</p>
+      <button class="btn" data-go="setup">Armar la partida</button>
+      <div style="text-align:center;margin-top:10px"><button class="rulesbtn" data-rules>Cómo se juega</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SETUP ============ -->
+<section class="screen" id="s-setup">
+  <div class="top"><button class="back" data-go="home">‹ Volver</button><h3 style="font-size:17px">Ajustes</h3></div>
+  <div class="scroll">
+    <div class="block">
+      <h3>¿De qué hablamos?</h3>
+      <p class="hint">Mezcla libre. Cuantas más categorías, más impredecible.</p>
+      <div class="cats" id="cats"></div>
+    </div>
+
+    <div class="block">
+      <h3>Palabras en la pecera</h3>
+      <p class="hint">Con 4 personas, 30 palabras son unos 25 minutos.</p>
+      <div class="seg" id="segTotal">
+        <button data-v="20" aria-pressed="false">20<small>corta</small></button>
+        <button data-v="30" aria-pressed="true">30<small>ideal</small></button>
+        <button data-v="45" aria-pressed="false">45<small>larga</small></button>
+        <button data-v="60" aria-pressed="false">60<small>maratón</small></button>
+      </div>
+    </div>
+
+    <div class="block">
+      <h3>Segundos por turno</h3>
+      <div class="seg" id="segTime">
+        <button data-v="45" aria-pressed="false">45</button>
+        <button data-v="60" aria-pressed="true">60</button>
+        <button data-v="75" aria-pressed="false">75</button>
+        <button data-v="90" aria-pressed="false">90</button>
+      </div>
+    </div>
+
+    <div class="block">
+      <h3>¿Quiénes juegan?</h3>
+      <p class="hint">El apodo de cada uno, como se llaman entre ustedes.</p>
+      <div class="addrow">
+        <input id="pName" placeholder="Apodo" maxlength="14" autocomplete="off" aria-label="Apodo del jugador">
+        <button class="add" id="pAdd">Agregar</button>
+      </div>
+      <div class="chips" id="players"></div>
+    </div>
+
+    <div class="block">
+      <div class="switchrow"><div>Permitir un pase por turno<small>Cuesta 1 punto para el otro equipo</small></div><button class="sw" id="swPass" aria-pressed="true" aria-label="Permitir un pase por turno"></button></div>
+      <div class="switchrow"><div>Sonido<small>Aviso en los últimos 10 segundos</small></div><button class="sw" id="swSound" aria-pressed="true" aria-label="Sonido"></button></div>
+      <div class="switchrow" style="border-bottom:1px solid var(--ink3)"><div>Vibración<small>Cada acierto</small></div><button class="sw" id="swVib" aria-pressed="true" aria-label="Vibración"></button></div>
+    </div>
+  </div>
+  <div class="sticky">
+    <p class="warn" id="warn"></p>
+    <button class="btn" id="toTeams">Armar los equipos</button>
+  </div>
+</section>
+
+<!-- ============ EQUIPOS ============ -->
+<section class="screen" id="s-teams">
+  <div class="top"><button class="back" data-go="setup">‹ Ajustes</button><h3 style="font-size:17px">Equipos</h3></div>
+  <div class="scroll">
+    <div class="block">
+      <h3>¿Cuántos equipos?</h3>
+      <p class="hint">Mínimo 2 jugadores en cada uno.</p>
+      <div class="seg" id="segTeams">
+        <button data-v="2" aria-pressed="true">2</button>
+        <button data-v="3" aria-pressed="false">3</button>
+        <button data-v="4" aria-pressed="false">4</button>
+      </div>
+    </div>
+
+    <div class="block">
+      <h3>¿Cómo los armamos?</h3>
+      <div class="seg" id="segMode">
+        <button data-v="azar" aria-pressed="true">Al azar<small>reparte la app</small></button>
+        <button data-v="fijo" aria-pressed="false">A dedo<small>eligen ustedes</small></button>
+      </div>
+      <button class="shufflebtn" id="shuffleTeams">🎲 Repartir de nuevo</button>
+      <p class="hint" id="modeHint" style="margin-top:11px"></p>
+      <div class="teams" id="teams"></div>
+    </div>
+  </div>
+  <div class="sticky">
+    <p class="warn" id="warnTeams"></p>
+    <button class="btn" id="startGame">Empezar a jugar</button>
+  </div>
+</section>
+
+<!-- ============ INTRO DE RONDA ============ -->
+<section class="screen" id="s-round">
+  <div class="center">
+    <div><p class="kicker" id="rIntroKicker">Ronda</p><div class="bigno" id="rIntroNo">1</div></div>
+    <h2 id="rIntroName" style="font-size:34px"></h2>
+    <div class="rulecard"><p id="rIntroRule"></p><p class="no" id="rIntroNo2"></p></div>
+    <p class="hint" id="rIntroBowl"></p>
+    <button class="rulesbtn" data-rules style="align-self:flex-start">Ver todas las reglas</button>
+  </div>
+  <button class="btn" id="rIntroGo">Entendido</button>
+</section>
+
+<!-- ============ LISTO PARA EL TURNO ============ -->
+<section class="screen" id="s-ready">
+  <div class="center">
+    <div><p class="kicker" id="readyRound"></p><div class="turnteam" id="readyTeam"></div></div>
+    <div class="giverline"><span class="dot" id="readyDot"></span><span id="readyWho"></span></div>
+    <p class="hint" style="font-size:14px">Pásale el celular. Los demás del equipo adivinan.</p>
+    <div class="rulecard"><p id="readyRule" style="margin:0"></p></div>
+  </div>
+  <div class="actions">
+    <p class="hint" style="text-align:center;margin:0 0 4px" id="readyLeft"></p>
+    <button class="btn" id="readyGo">Ya, arranca</button>
+    <div style="text-align:center"><button class="rulesbtn" data-rules>Recordar las reglas</button></div>
+  </div>
+</section>
+
+<!-- ============ JUEGO ============ -->
+<section class="screen" id="s-play">
+  <div class="bar"><i id="barFill"></i></div>
+  <div class="playtop">
+    <span id="playTeam"></span>
+    <span class="clock" id="clock">60</span>
+    <span id="playLeft"></span>
+  </div>
+  <div class="card" id="card">
+    <div class="cardcat" id="cardCat"></div>
+    <div class="word" id="word" aria-live="polite"></div>
+    <div class="swipehint" id="swipeHint">desliza ↑ acertaron · ↓ pasar (regala punto)</div>
+  </div>
+  <div class="actions">
+    <button class="btn" id="btnOk">Adivinaron</button>
+    <button class="btn ghost" id="btnPass">Pasar — te queda 1</button>
+  </div>
+</section>
+
+<!-- ============ FIN DE TURNO ============ -->
+<section class="screen" id="s-turn">
+  <div class="scroll">
+    <p class="kicker" id="turnKicker"></p>
+    <h2 style="font-size:30px;margin-bottom:16px" id="turnHead"></h2>
+    <div class="list" id="turnList"></div>
+    <p class="kicker">Marcador</p>
+    <div class="score" id="turnScore"></div>
+    <button class="rulesbtn" data-rules>Recordar las reglas</button>
+  </div>
+  <button class="btn" id="turnNext">Siguiente turno</button>
+</section>
+
+<!-- ============ FIN DE RONDA ============ -->
+<section class="screen" id="s-rend">
+  <div class="scroll">
+    <p class="kicker">Pecera vacía</p>
+    <h2 style="font-size:32px;margin-bottom:6px" id="rendHead"></h2>
+    <p class="hint" id="rendSub"></p>
+    <div class="score" id="rendScore"></div>
+    <div class="rulecard"><p style="margin:0" id="rendNext"></p></div>
+  </div>
+  <button class="btn" id="rendGo">Vamos</button>
+</section>
+
+<!-- ============ FINAL ============ -->
+<section class="screen" id="s-end">
+  <div class="scroll">
+    <div class="trophy">🏆</div>
+    <p class="kicker" style="margin-top:10px">Se acabó</p>
+    <h2 style="font-size:36px;margin-bottom:18px" id="endHead"></h2>
+    <div class="score" id="endScore"></div>
+    <p class="kicker">Todas las palabras que pasaron</p>
+    <div class="list" id="endWords"></div>
+  </div>
+  <div class="actions">
+    <button class="btn" id="endAgain">Otra partida, palabras nuevas</button>
+    <button class="btn ghost" id="endSetup">Cambiar ajustes</button>
+  </div>
+</section>
+
+
+<div class="sheet" id="rules" hidden>
+  <div class="sheetcard">
+    <div class="sheettop"><h3 style="font-size:22px">Cómo se juega</h3><button id="rulesClose">Cerrar</button></div>
+    <div class="sheetbody" id="rulesBody"></div>
+  </div>
+</div>
+
+</div>
+<script>
+/* =========================================================
+   BANCO DE PALABRAS
+   ========================================================= */
+const CATS = [
+  {id:"tragos", e:"🍸", n:"Tragos y bebidas", w:["Aguardiente","Ron","Whisky","Tequila","Mezcal","Vodka","Ginebra","Cerveza","Michelada","Mojito","Piña colada","Margarita","Daiquiri","Caipiriña","Cuba libre","Sangría","Vino tinto","Champaña","Sidra","Canelazo","Chicha","Guarapo","Sake","Baileys","Aperol Spritz","Gin tonic","Martini","Bloody Mary","Tequila sunrise","Refajo","Cerveza artesanal","Shot","Brindis","Guayabo","Destapador","Hielo","Limón y sal","Barra libre","Cantinero","Coctelera","Ponche","Licor de café","Brandy","Cerveza sin alcohol","Chupito","Tinto de verano","Hidromiel","Vino blanco","Copa de más","Cervecería"]},
+  {id:"comida", e:"🍕", n:"Comida y antojos", w:["Arepa","Empanada","Tamal","Bandeja paisa","Ajiaco","Sancocho","Lechona","Changua","Buñuelo","Natilla","Pandebono","Almojábana","Obleas","Arroz con pollo","Pizza","Hamburguesa","Perro caliente","Sushi","Tacos","Ceviche","Paella","Lasaña","Espagueti","Ramen","Pollo frito","Costillas BBQ","Guacamole","Nachos","Papas fritas","Helado","Brownie","Torta tres leches","Flan","Arroz con leche","Mango biche","Salchipapa","Choripán","Chicharrón","Patacón","Plátano maduro","Huevos pericos","Croissant","Panqueques","Sopa de pollo","Ensalada César","Queso derretido","Salsa picante","Domicilio","Sobremesa","Cocinar sin receta"]},
+  {id:"cine", e:"🎬", n:"Cine 2000–2010", w:["El Señor de los Anillos","Harry Potter","Shrek","Piratas del Caribe","Gladiador","Náufrago","Matrix Reloaded","Buscando a Nemo","Los Increíbles","Kill Bill","Spider-Man","El Caballero de la Noche","Avatar","Rápidos y Furiosos","Crepúsculo","Mamma Mia","El Diablo Viste a la Moda","Slumdog Millionaire","Up: una aventura de altura","Wall-E","Ratatouille","Monsters Inc.","Toy Story 3","Iron Man","Transformers","El Origen","300","Troya","El Laberinto del Fauno","Amélie","La Gran Estafa","Amores Perros","Y tu mamá también","Zoolander","Scary Movie","Chicas Pesadas","Legalmente Rubia","Superbad","¿Qué pasó ayer?","Una Noche en el Museo","Madagascar","La Era de Hielo","Cars","Kung Fu Panda","Diario de una Pasión","El Curioso Caso de Benjamin Button","Yo, Robot","Minority Report","El Aro","Actividad Paranormal","El Último Samurái","Million Dollar Baby","La Era de Hielo 2","Volver","Casino Royale"]},
+  {id:"famosos", e:"⭐", n:"Famosos y personajes", w:["Shakira","Juanes","Karol G","Lionel Messi","Cristiano Ronaldo","James Rodríguez","Bad Bunny","Beyoncé","Michael Jackson","Madonna","Lady Gaga","Elon Musk","Steve Jobs","Barack Obama","Gabriel García Márquez","Frida Kahlo","Sofía Vergara","Maluma","J Balvin","Carlos Vives","Rihanna","Taylor Swift","Falcao","Nairo Quintana","Egan Bernal","Mr. Bean","El Chavo del 8","Don Ramón","Homero Simpson","Bob Esponja","Mickey Mouse","Batman","Superman","Darth Vader","Yoda","Papá Noel","Albert Einstein","Cleopatra","Napoleón","Bob Marley","Freddie Mercury","Elvis Presley","Marilyn Monroe","Charlie Chaplin","Leonardo DiCaprio","Brad Pitt","Jim Carrey","Adele","Rosalía","Feid"]},
+  {id:"musica", e:"🎤", n:"Música y cultura pop", w:["Reggaetón","Salsa","Vallenato","Cumbia","Merengue","Bachata","Rock en español","Karaoke","Guitarra eléctrica","Batería","Concierto","Festival","Playlist","Auriculares","Moonwalk","Coro","Acordeón","Maracas","Tambor","Disco de vinilo","Videoclip","Autotune","Banda sonora","Ópera","Rap","Jazz","Techno","Balada romántica","Serenata","Himno nacional","Bailar sin ritmo","Canción pegajosa","Grupo de WhatsApp con la playlist","Cantar en la ducha","Aplausos","Bis","Escenario","Micrófono","Gira mundial","Fan número uno"]},
+  {id:"cosas", e:"🛋️", n:"Cosas y acciones", w:["Control remoto","Aspiradora","Licuadora","Cargador de celular","Papel higiénico","Wifi","Contraseña","Alarma del despertador","Cepillo de dientes","Sofá","Escoba","Nevera","Microondas","Lavadora","Plancha","Ventilador","Espejo","Almohada","Llaves","Destornillador","Escalera","Sombrilla","Cortauñas","Tijeras","Estornudar","Bostezar","Roncar","Tropezar","Nadar","Manejar","Trotar","Cocinar","Tomarse una selfie","Hacer fila","Buscar parqueadero","Madrugar","Trasnochar","Procrastinar","Perder el celular","Armar un mueble","Quemarse con la sopa","Aplaudir","Silbar","Escalar","Tender la cama"]},
+  {id:"animales", e:"🐊", n:"Animales y naturaleza", w:["Perezoso","Colibrí","Cocodrilo","Pulpo","Pingüino","Jirafa","Hormiga","Murciélago","Delfín","Tiburón","Águila","Caracol","Camaleón","Canguro","Elefante","Mariposa","Escarabajo","Rana","Serpiente","Oso polar","Gallina","Cerdo","Mosquito","Abeja","Ballena","Erizo","Búho","Llama","Tucán","Iguana","Volcán","Huracán","Arcoíris","Cascada","Desierto","Selva","Glaciar","Terremoto","Eclipse","Luciérnaga"]},
+  {id:"nuestro", e:"🇨🇴", n:"Muy de acá", w:["Chiva rumbera","Transmilenio","Monserrate","Cartagena","Ciclovía","Tejo","Parranda","El Dorado","Café colombiano","Sombrero vueltiao","Carnaval de Barranquilla","Feria de las Flores","Silletero","Mochila wayuu","Ruana","Páramo","Caño Cristales","Piedra del Peñol","Desierto de la Tatacoa","Amazonas","Mototaxi","Tinto de la esquina","La ñapa","Parcero","Chévere","Rumbear","Tienda de barrio","Vecina chismosa","Trancón","Aguacero","Sudadera del colegio","Bocadillo con queso","Almuerzo corriente","Jugo de lulo","Vueltas en monedas","Empanada con ají","Mercado de pulgas","Cuadra","Bus intermunicipal","Portería del edificio"]},
+  {id:"viajes", e:"✈️", n:"Lugares del mundo", w:["Torre Eiffel","Nueva York","Machu Picchu","Cancún","Río de Janeiro","Cristo Redentor","Tokio","Gran Muralla China","Pirámides de Egipto","Taj Mahal","Coliseo Romano","Venecia","Santorini","Ibiza","Las Vegas","Sahara","Polo Norte","Everest","Islas Galápagos","Aeropuerto","Maleta de mano","Pasaporte","Turbulencia","Escala de 8 horas","Crucero","Hostal barato","Mapa doblado","Sellos del pasaporte","Duty free","Cambio de moneda","Guía turístico","Foto típica","Bronceado disparejo","Perder el vuelo","Selfie en la playa"]},
+  {id:"picante", e:"🌶️", n:"Picante", spicy:true, w:["Beso francés","Cita a ciegas","Amor a primera vista","Luna de miel","Despedida de soltero","Motel","Lencería","Kamasutra","Tinder","Sexting","El ex","Celos","Infidelidad","Amigos con derechos","Ligar","Piropo","Coqueteo","Striptease","Perreo","La suegra","Primera cita","Beso robado","Cosquillas","Masaje en la espalda","Velas y vino","Jacuzzi","Antifaz","Venda en los ojos","Ducha en pareja","Ronquidos","Dormir abrazados","Robar las cobijas","Netflix y algo más","Mensaje a las 2 a.m.","Cucharita","Mariposas en el estómago","Amor platónico","Corazón roto","Flechazo","Verse a escondidas","Pedida de mano","Anillo de compromiso","Boda sorpresa","Pelea por el control remoto","Aniversario olvidado","Apodo cursi","Foto vergonzosa en el celular","Bailar pegados","Mirada cómplice","Escapada de fin de semana"]}
+];
+
+const ROUNDS = [
+  {n:1,name:"Descríbela",accent:"var(--r1)",rule:"Habla todo lo que quieras hasta que caigan en la palabra.",no:"Prohibido: decir la palabra, partes de ella, traducirla, rimarla o mover las manos."},
+  {n:2,name:"Una sola palabra",accent:"var(--r2)",rule:"Puedes decir UNA palabra como pista. Una. Y después te callas hasta que adivinen o se rinda el equipo.",no:"Aquí se paga la falta de atención en la ronda 1. Son las mismas palabras."},
+  {n:3,name:"Mímica",accent:"var(--r3)",rule:"Ni una palabra, ni un sonido. Solo el cuerpo.",no:"Puedes señalar objetos y personas de la sala. No puedes deletrear con los dedos."}
+];
+const RULES = [
+  {t:"El objetivo", p:["Adivinar la mayor cantidad de palabras de la pecera antes de que se acabe el tiempo. Gana el equipo con más puntos sumando las tres rondas."]},
+  {t:"El turno", p:["Quien explica mira la palabra en silencio y arranca el cronómetro. Cada vez que su equipo acierta, sale una palabra nueva y sigue hasta que suene el tiempo.","Si el tiempo se acaba con una palabra en la mano, esa palabra vuelve a la pecera sin castigo para nadie."]},
+  {t:"Pasar cuesta caro", p:["Si pasas, la palabra vuelve a la pecera <b class=\"n\">y el otro equipo se lleva 1 punto</b>. Solo se puede pasar una vez por turno.","Pensarlo dos veces: casi siempre sale más barato quemar diez segundos que regalar el punto."]},
+  {t:"La ronda", p:["La ronda termina cuando la pecera queda vacía. Entonces todas las palabras vuelven adentro y empieza la siguiente ronda con las mismas palabras, pero con menos ayuda.","Por eso conviene poner atención en la ronda 1, aunque no sea el turno de uno."]}
+];
+const TEAMCOLORS = ["#4ADFC6","#FFC247","#FF5C8A","#8A7BFF"];
+const TEAMNAMES = ["Los Guayabos","Las Panteras","Los Patacones","Los Trasnochados","Los Sin Pena","Las Lechonas","Los Bochinches","Los Aguacates","Los Perdedores","Las Malas Mímicas","Los Parceros","Los del Fondo"];
+const esc = t => String(t).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* =========================================================
+   ESTADO
+   ========================================================= */
+const S = {
+  cats:new Set(["tragos","comida","cine","famosos"]),
+  total:30, turnTime:60, nTeams:2,
+  players:[], teams:[], mode:"azar", giver:"", allowPass:true, sound:true, vib:true,
+  round:0, bowl:[], played:[], turnTeam:0,
+  current:null, guessed:[], gifted:[], missed:null, passesLeft:1,
+  endAt:0, tick:null, lastBeep:99, wake:null
+};
+
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const catById = id => CATS.find(c=>c.id===id);
+const shuffle = a => { for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; };
+
+function screen(id){
+  $$(".screen").forEach(s=>s.classList.remove("on"));
+  $("#s-"+id).classList.add("on");
+  window.scrollTo(0,0);
+  const sc = $("#s-"+id).querySelector(".scroll"); if(sc) sc.scrollTop = 0;
+}
+function setAccent(c){ document.documentElement.style.setProperty("--accent", c); }
+
+/* ---------- panel de reglas ---------- */
+function buildRules(){
+  const rondas = ROUNDS.map(r=>`
+    <div class="rule">
+      <h4><b class="n">${r.n}.</b> ${r.name}</h4>
+      <p>${r.rule}</p>
+      <p class="no">${r.no}</p>
+    </div>`).join("");
+  const generales = RULES.map(r=>`
+    <div class="rule">
+      <h4>${r.t}</h4>
+      ${r.p.map(x=>`<p>${x}</p>`).join("")}
+    </div>`).join("");
+  $("#rulesBody").innerHTML = `<p class="hint" style="margin:0 0 2px">Las tres rondas, en orden:</p>${rondas}${generales}`;
+}
+function openRules(){ buildRules(); $("#rules").hidden = false; }
+function closeRules(){ $("#rules").hidden = true; }
+
+/* ---------- feedback ---------- */
+let ac;
+function beep(freq,dur,type,vol){
+  if(!S.sound) return;
+  try{
+    ac = ac || new (window.AudioContext||window.webkitAudioContext)();
+    if(ac.state==="suspended") ac.resume();
+    const o=ac.createOscillator(), g=ac.createGain();
+    o.type=type||"sine"; o.frequency.value=freq;
+    g.gain.setValueAtTime(vol||.05, ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(.0001, ac.currentTime+(dur||.09));
+    o.connect(g); g.connect(ac.destination);
+    o.start(); o.stop(ac.currentTime+(dur||.09)+.03);
+  }catch(e){}
+}
+function buzz(ms){ if(S.vib && navigator.vibrate) try{navigator.vibrate(ms)}catch(e){} }
+async function keepAwake(on){
+  try{
+    if(on && "wakeLock" in navigator && !S.wake) S.wake = await navigator.wakeLock.request("screen");
+    if(!on && S.wake){ S.wake.release(); S.wake = null; }
+  }catch(e){}
+}
+
+/* =========================================================
+   SETUP
+   ========================================================= */
+function renderCats(){
+  $("#cats").innerHTML = CATS.map(c=>`
+    <button class="cat${c.spicy?" spicy":""}" data-id="${c.id}" aria-pressed="${S.cats.has(c.id)}">
+      <span class="e">${c.e}</span>
+      <span class="n">${c.n}${c.spicy?" <span style='font-size:10px;vertical-align:top'>+18</span>":""}</span>
+      <span class="c">${c.w.length} palabras</span>
+    </button>`).join("");
+  $$("#cats .cat").forEach(b=>b.onclick=()=>{
+    const id=b.dataset.id;
+    S.cats.has(id) ? S.cats.delete(id) : S.cats.add(id);
+    b.setAttribute("aria-pressed", S.cats.has(id));
+    checkSetup();
+  });
+}
+function renderPlayers(){
+  $("#players").innerHTML = S.players.length
+    ? S.players.map((n,i)=>`<span class="chip">${esc(n)}<button data-i="${i}" aria-label="Quitar a ${esc(n)}">×</button></span>`).join("")
+    : `<div class="empty" style="width:100%">Todavía no hay nadie. Agrega mínimo 4 apodos.</div>`;
+  $$("#players .chip button").forEach(b=>b.onclick=()=>{
+    S.players.splice(+b.dataset.i,1);
+    renderPlayers(); checkSetup();
+  });
+}
+function addPlayer(){
+  const inp = $("#pName"), n = inp.value.trim().replace(/\s+/g," ");
+  if(!n) return;
+  if(S.players.some(p=>p.toLowerCase()===n.toLowerCase())){ inp.value=""; return; }
+  if(S.players.length>=16) return;
+  S.players.push(n);
+  inp.value=""; inp.focus();
+  beep(760,.05);
+  renderPlayers(); checkSetup();
+}
+function dealTeams(keepNames){
+  const names = shuffle([...TEAMNAMES]);
+  const prev = S.teams.map(t=>t.name);
+  S.teams = Array.from({length:S.nTeams},(_,i)=>({
+    name: (keepNames && prev[i]) ? prev[i] : names[i],
+    members:[], idx:0, scores:[0,0,0]
+  }));
+  const order = S.mode==="azar" ? shuffle([...S.players]) : [...S.players];
+  order.forEach((p,i)=>S.teams[i % S.nTeams].members.push(p));
+  renderTeams();
+}
+function membersOk(){
+  const all = S.teams.flatMap(t=>t.members);
+  return S.teams.length===S.nTeams && all.length===S.players.length && S.players.every(p=>all.includes(p));
+}
+function moveMember(ti, mi){
+  const [p] = S.teams[ti].members.splice(mi,1);
+  S.teams[(ti+1) % S.nTeams].members.push(p);
+  buzz(14); beep(620,.04);
+  renderTeams(); checkTeams();
+}
+function renderTeams(){
+  const fijo = S.mode==="fijo";
+  $("#shuffleTeams").style.display = fijo ? "none" : "block";
+  $("#modeHint").textContent = fijo
+    ? "Toca un nombre para pasarlo al siguiente equipo."
+    : "Cada vez que reparten queda distinto. Los nombres de equipo los pueden cambiar.";
+  if(!S.players.length){ $("#teams").innerHTML=""; return; }
+  $("#teams").innerHTML = S.teams.map((t,i)=>`
+    <div class="teamcard" style="box-shadow:inset 0 0 0 1.5px ${TEAMCOLORS[i]}55">
+      <div class="teamhead">
+        <span class="dot" style="background:${TEAMCOLORS[i]}"></span>
+        <input value="${esc(t.name)}" data-i="${i}" maxlength="20" aria-label="Nombre del equipo ${i+1}">
+      </div>
+      <div class="members">${
+        t.members.length
+          ? t.members.map((m,j)=> fijo
+              ? `<button class="member tap" data-t="${i}" data-m="${j}">${esc(m)} <span>→</span></button>`
+              : `<span class="member">${esc(m)}</span>`).join("")
+          : `<span class="member" style="color:var(--muted)">sin nadie todavía</span>`
+      }</div>
+    </div>`).join("");
+  $$("#teams input").forEach(inp=>{
+    inp.oninput = () => { S.teams[inp.dataset.i].name = inp.value.trim() || "Equipo "+(+inp.dataset.i+1); };
+  });
+  $$("#teams .member.tap").forEach(b=> b.onclick = ()=> moveMember(+b.dataset.t, +b.dataset.m));
+}
+function checkTeams(){
+  const flojo = S.teams.find(t=>t.members.length<2);
+  const msg = flojo ? `${flojo.name} necesita al menos 2 jugadores.` : "";
+  $("#warnTeams").textContent = msg;
+  $("#startGame").disabled = !!msg;
+  $("#startGame").style.opacity = msg ? .45 : 1;
+}
+function goTeams(){
+  if(!membersOk()) dealTeams(false);
+  renderTeams(); checkTeams(); screen("teams");
+}
+function seg(sel, key, after){
+  $$(sel+" button").forEach(b=>b.onclick=()=>{
+    $$(sel+" button").forEach(x=>x.setAttribute("aria-pressed","false"));
+    b.setAttribute("aria-pressed","true");
+    S[key] = +b.dataset.v;
+    if(after) after();
+    checkSetup();
+  });
+}
+function sw(sel,key){
+  const b=$(sel);
+  b.onclick=()=>{ S[key]=!S[key]; b.setAttribute("aria-pressed",S[key]); if(key==="sound"&&S.sound) beep(880,.06); if(key==="vib"&&S.vib) buzz(25); };
+}
+function pool(){ return [...S.cats].reduce((n,id)=>n+catById(id).w.length,0); }
+function checkSetup(){
+  const n = pool(), faltan = 4 - S.players.length;
+  let msg = "";
+  if(S.cats.size===0) msg = "Elige al menos una categoría.";
+  else if(n < S.total) msg = `Con esas categorías solo hay ${n} palabras. Agrega otra o baja el número.`;
+  else if(faltan > 0) msg = `Faltan ${faltan} ${faltan===1?"jugador":"jugadores"}. Con menos de 4 no tiene gracia.`;
+  const ok = !msg;
+  $("#warn").textContent = msg;
+  $("#toTeams").disabled = !ok;
+  $("#toTeams").style.opacity = ok ? 1 : .45;
+}
+
+renderCats(); renderPlayers();
+seg("#segTotal","total"); seg("#segTime","turnTime");
+seg("#segTeams","nTeams",()=>{ dealTeams(true); checkTeams(); });
+$$("#segMode button").forEach(b=>b.onclick=()=>{
+  $$("#segMode button").forEach(x=>x.setAttribute("aria-pressed","false"));
+  b.setAttribute("aria-pressed","true");
+  S.mode = b.dataset.v;
+  if(S.mode==="azar") dealTeams(true); else renderTeams();
+  checkTeams();
+});
+$("#pAdd").onclick = addPlayer;
+$("#pName").addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); addPlayer(); }});
+$("#shuffleTeams").onclick = ()=>{ beep(520,.07); buzz(20); dealTeams(true); checkTeams(); };
+$("#toTeams").onclick = goTeams;
+sw("#swPass","allowPass"); sw("#swSound","sound"); sw("#swVib","vib");
+checkSetup();
+$$("[data-go]").forEach(b=>b.onclick=()=>screen(b.dataset.go));
+$$("[data-rules]").forEach(b=>b.onclick=openRules);
+$("#rulesClose").onclick = closeRules;
+$("#rules").onclick = e => { if(e.target === $("#rules")) closeRules(); };
+
+/* =========================================================
+   ARRANQUE
+   ========================================================= */
+function pickWords(){
+  const buckets = [...S.cats].map(id=>({cat:catById(id), list:shuffle([...catById(id).w])}));
+  const out=[]; let i=0;
+  while(out.length < S.total){
+    const b = buckets[i % buckets.length];
+    if(b.list.length) out.push({t:b.list.pop(), cat:b.cat.n, e:b.cat.e});
+    i++;
+    if(i > 4000) break;
+  }
+  return shuffle(out);
+}
+$("#startGame").onclick = () => {
+  S.played = pickWords();
+  S.teams.forEach(t=>{ t.scores=[0,0,0]; t.idx=0; });
+  S.round = 0; S.turnTeam = 0;
+  beep(660,.07);
+  startRound();
+};
+function startRound(){
+  S.bowl = shuffle([...S.played]);
+  const r = ROUNDS[S.round];
+  setAccent(r.accent);
+  $("#rIntroKicker").textContent = `Ronda ${r.n} de 3`;
+  $("#rIntroNo").textContent = r.n;
+  $("#rIntroName").textContent = r.name;
+  $("#rIntroRule").textContent = r.rule;
+  $("#rIntroNo2").textContent = r.no;
+  $("#rIntroBowl").textContent = S.round===0
+    ? `${S.bowl.length} palabras en la pecera. Nadie las ha visto todavía.`
+    : `Las mismas ${S.bowl.length} palabras vuelven a la pecera.`;
+  screen("round");
+}
+$("#rIntroGo").onclick = readyTurn;
+
+/* =========================================================
+   TURNO
+   ========================================================= */
+function giverOf(i){ const t = S.teams[i]; return t.members[t.idx % t.members.length]; }
+function readyTurn(){
+  const r = ROUNDS[S.round], t = S.teams[S.turnTeam];
+  S.giver = giverOf(S.turnTeam);
+  $("#readyRound").textContent = `Ronda ${r.n} · ${r.name}`;
+  $("#readyTeam").textContent = "Turno de " + S.giver;
+  $("#readyTeam").style.color = TEAMCOLORS[S.turnTeam];
+  $("#readyDot").style.background = TEAMCOLORS[S.turnTeam];
+  $("#readyWho").innerHTML = `explica para <b>${esc(t.name)}</b>: ${t.members.filter(m=>m!==S.giver).map(esc).join(", ")}`;
+  $("#readyRule").textContent = r.rule;
+  $("#readyLeft").textContent = `${S.bowl.length} palabras en la pecera · ${S.turnTime} segundos`;
+  screen("ready");
+}
+$("#readyGo").onclick = startTurn;
+
+function startTurn(){
+  S.guessed=[]; S.gifted=[]; S.missed=null; S.ended=false;
+  S.passesLeft = S.allowPass ? 1 : 0;
+  S.endAt = Date.now() + S.turnTime*1000;
+  S.lastBeep = 99;
+  $("#playTeam").textContent = S.giver;
+  keepAwake(true);
+  beep(700,.06);
+  screen("play");
+  S.tick = setInterval(tickFn, 100);
+  tickFn();
+  nextWord();
+}
+function tickFn(){
+  const left = Math.max(0,(S.endAt - Date.now())/1000);
+  const secs = Math.ceil(left);
+  $("#clock").textContent = secs;
+  $("#clock").classList.toggle("low", secs<=10);
+  $("#barFill").style.transform = `scaleX(${left/S.turnTime})`;
+  if(secs<=10 && secs>0 && secs!==S.lastBeep){ S.lastBeep=secs; beep(secs<=3?1100:820,.07,"triangle",.045); }
+  if(left<=0) endTurn(false);
+}
+function nextWord(){
+  if(!S.bowl.length){ endTurn(true); return; }
+  S.current = S.bowl[0];
+  $("#cardCat").textContent = S.current.e + "  " + S.current.cat;
+  $("#word").textContent = S.current.t;
+  $("#playLeft").textContent = S.bowl.length + " en la pecera";
+  const c=$("#card"); c.classList.remove("pop"); void c.offsetWidth; c.classList.add("pop");
+  const bp = $("#btnPass"), can = S.passesLeft>0 && S.bowl.length>1;
+  bp.style.opacity = can ? 1 : .35;
+  bp.disabled = !can;
+  bp.textContent = !S.allowPass ? "Pases desactivados"
+    : (S.passesLeft>0 ? `Pasar — 1 punto para ${S.teams[rivalTeam()].name}` : "Ya usaste el pase");
+}
+function hit(){
+  if(!S.current || S.ended) return;
+  S.teams[S.turnTeam].scores[S.round]++;
+  S.guessed.push(S.current);
+  S.bowl.shift();
+  buzz(28); beep(980,.08,"sine",.06);
+  nextWord();
+}
+function rivalTeam(){ return (S.turnTeam + 1) % S.teams.length; }
+function pass(){
+  if(S.ended || S.passesLeft<=0 || S.bowl.length<2) return;
+  S.passesLeft--;
+  const r = rivalTeam();
+  S.teams[r].scores[S.round]++;
+  S.gifted.push({ t:S.current.t, to:S.teams[r].name });
+  S.bowl.push(S.bowl.shift());
+  beep(260,.16,"square",.04); buzz([40,50,40]);
+  nextWord();
+}
+$("#btnOk").onclick = hit;
+$("#btnPass").onclick = pass;
+
+/* swipe */
+let sy=0, sx=0;
+const card = $("#card");
+card.addEventListener("touchstart", e=>{ sy=e.touches[0].clientY; sx=e.touches[0].clientX; }, {passive:true});
+card.addEventListener("touchend", e=>{
+  const dy = e.changedTouches[0].clientY - sy, dx = Math.abs(e.changedTouches[0].clientX - sx);
+  if(dx>70) return;
+  if(dy < -60) hit();
+  else if(dy > 60) pass();
+}, {passive:true});
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape"){ closeRules(); return; }
+  if(!$("#rules").hidden) return;
+  if(!$("#s-play").classList.contains("on")) return;
+  if(e.key===" "||e.key==="ArrowUp"){ e.preventDefault(); hit(); }
+  if(e.key==="ArrowDown"){ e.preventDefault(); pass(); }
+});
+
+function endTurn(bowlEmpty){
+  if(S.ended) return;
+  S.ended = true;
+  clearInterval(S.tick); S.tick=null;
+  keepAwake(false);
+  if(!bowlEmpty){ S.missed = S.current; beep(170,.5,"sawtooth",.07); buzz([90,60,90]); }
+  else { beep(1200,.14,"sine",.06); }
+
+  const r = ROUNDS[S.round];
+  $("#turnKicker").textContent = `Ronda ${r.n} · ${S.giver} para ${S.teams[S.turnTeam].name}`;
+  S.teams[S.turnTeam].idx++;
+  const p = S.guessed.length;
+  $("#turnHead").textContent = p===0 ? "Cero. Pasa." : p===1 ? "1 palabra" : `${p} palabras`;
+  $("#turnList").innerHTML =
+    S.guessed.map(w=>`<span class="tag ok">${esc(w.t)}</span>`).join("") +
+    (S.missed?`<span class="tag miss">${esc(S.missed.t)} — se quedó</span>`:"") +
+    S.gifted.map(g=>`<span class="tag gift">${esc(g.t)} — 1 punto para ${esc(g.to)}</span>`).join("");
+  $("#turnScore").innerHTML = scoreHTML();
+
+  S.turnTeam = (S.turnTeam+1) % S.teams.length;
+  if(bowlEmpty || !S.bowl.length){
+    $("#turnNext").textContent = "Ver la ronda";
+    $("#turnNext").onclick = endRound;
+  } else {
+    $("#turnNext").textContent = "Le toca a " + giverOf(S.turnTeam);
+    $("#turnNext").onclick = readyTurn;
+  }
+  screen("turn");
+}
+
+function totals(){ return S.teams.map(t=>t.scores.reduce((a,b)=>a+b,0)); }
+function scoreHTML(){
+  const tt = totals(), max = Math.max(...tt);
+  return S.teams.map((t,i)=>`
+    <div class="srow${tt[i]===max&&max>0?" lead":""}">
+      <span class="dot" style="background:${tt[i]===max&&max>0?"var(--accent-ink)":TEAMCOLORS[i]}"></span>
+      <span class="nm">${esc(t.name)}<small>${t.members.map(esc).join(" · ")}</small></span>
+      <span class="rr">${t.scores.join(" · ")}</span>
+      <span class="pt">${tt[i]}</span>
+    </div>`).join("");
+}
+
+function endRound(){
+  const r = ROUNDS[S.round];
+  const best = Math.max(...S.teams.map(t=>t.scores[S.round]));
+  const win = S.teams.filter(t=>t.scores[S.round]===best).map(t=>t.name);
+  $("#rendHead").textContent = `Fin de la ronda ${r.n}`;
+  $("#rendSub").textContent = best===0 ? "Nadie se lució. Vamos de nuevo."
+    : `Mejor ronda: ${win.join(" y ")} con ${best}.`;
+  $("#rendScore").innerHTML = scoreHTML();
+  if(S.round<2){
+    const nx = ROUNDS[S.round+1];
+    $("#rendNext").textContent = `Ahora viene la ronda ${nx.n}: ${nx.name}. ${nx.rule}`;
+    $("#rendGo").textContent = "Ir a la ronda " + nx.n;
+    $("#rendGo").onclick = ()=>{ S.round++; startRound(); };
+  } else {
+    $("#rendNext").textContent = "Tres rondas, mismas palabras, todo contado. Vamos al resultado.";
+    $("#rendGo").textContent = "Ver quién ganó";
+    $("#rendGo").onclick = endGame;
+  }
+  screen("rend");
+}
+
+function endGame(){
+  setAccent("var(--r2)");
+  const tt = totals(), max = Math.max(...tt);
+  const win = S.teams.filter((t,i)=>tt[i]===max).map(t=>t.name);
+  $("#endHead").textContent = win.length>1 ? "Empate: " + win.join(" y ") : "Gana " + win[0];
+  $("#endScore").innerHTML = scoreHTML();
+  $("#endWords").innerHTML = S.played.map(w=>`<span class="tag">${w.t}</span>`).join("");
+  beep(660,.1); setTimeout(()=>beep(880,.1),120); setTimeout(()=>beep(1180,.22),250);
+  buzz([50,50,50,50,120]);
+  screen("end");
+}
+$("#endAgain").onclick = ()=>{ $("#startGame").onclick(); };
+$("#endSetup").onclick = ()=>{ setAccent("var(--r1)"); screen("setup"); };
+
+document.addEventListener("visibilitychange", ()=>{ if(document.hidden && S.wake) keepAwake(false); });
+</script>
+<script>
+/* Service worker: la app se instala y funciona sin internet */
+if("serviceWorker" in navigator){
+  window.addEventListener("load", ()=>{
+    navigator.serviceWorker.register("/sw.js").catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
